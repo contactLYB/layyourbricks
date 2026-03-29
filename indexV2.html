@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lay Your Bricks — Build the Future, Brick by Brick</title>
+<meta name="description" content="Invest as little as $50 into Baltimore small businesses you believe in. Earn returns while building your neighborhood. Join the waitlist.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --terracotta: #C45A3C;
+    --terracotta-dark: #A34430;
+    --terracotta-light: #E8755A;
+    --brick-deep: #8B3A2A;
+    --cream: #FAF5F0;
+    --cream-dark: #F0E8DE;
+    --charcoal: #2C2420;
+    --charcoal-light: #4A3F38;
+    --warm-gray: #8C7E74;
+    --gold: #D4A84B;
+    --gold-light: #E8C36A;
+    --sage: #6B8F71;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* === TEXTURE OVERLAY === */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C45A3C' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* === NAV === */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 1.25rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    background: rgba(250, 245, 240, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(196, 90, 60, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--terracotta);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { color: var(--charcoal); }
+
+  .nav-cta {
+    background: var(--terracotta);
+    color: white;
+    padding: 0.65rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.25s ease;
+    letter-spacing: 0.01em;
+  }
+
+  .nav-cta:hover {
+    background: var(--terracotta-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(196, 90, 60, 0.3);
+  }
+
+  /* === HERO === */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 8rem 2rem 4rem;
+    z-index: 1;
+  }
+
+  .hero-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .hero-text { animation: fadeUp 0.8s ease-out; }
+
+  .tagline {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--terracotta);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tagline::before {
+    content: '';
+    display: inline-block;
+    width: 28px;
+    height: 2px;
+    background: var(--terracotta);
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.5rem, 5vw, 3.75rem);
+    line-height: 1.1;
+    color: var(--charcoal);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--terracotta);
+  }
+
+  .hero-description {
+    font-size: 1.15rem;
+    color: var(--charcoal-light);
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    max-width: 520px;
+  }
+
+  .cta-group { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--terracotta);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.05rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary:hover {
+    background: var(--terracotta-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(196, 90, 60, 0.35);
+  }
+
+  .btn-primary svg { transition: transform 0.3s ease; }
+  .btn-primary:hover svg { transform: translateX(3px); }
+
+  .btn-secondary {
+    color: var(--charcoal-light);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 1rem 0.5rem;
+    transition: color 0.2s ease;
+  }
+
+  .btn-secondary:hover { color: var(--terracotta); }
+
+  /* === HERO VISUAL — BRICK BLOCK === */
+  .hero-visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeUp 0.8s ease-out 0.2s both;
+  }
+
+  .brick-block {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 2rem;
+    max-width: 360px;
+    width: 100%;
+  }
+
+  .brick {
+    aspect-ratio: 1.8;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: all 0.35s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .brick::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+  }
+
+  .brick:hover { transform: translateY(-3px) scale(1.03); }
+
+  .brick-icon { font-size: 1.4rem; margin-bottom: 0.25rem; }
+
+  .brick-1 { background: var(--terracotta); color: white; }
+  .brick-2 { background: var(--brick-deep); color: rgba(255,255,255,0.9); }
+  .brick-3 { background: var(--gold); color: var(--charcoal); }
+  .brick-4 { background: var(--sage); color: white; }
+  .brick-5 { background: var(--charcoal); color: var(--cream); }
+  .brick-6 { background: var(--terracotta-light); color: white; }
+
+  .brick-label { font-size: 1.6rem; margin-bottom: 0.15rem; }
+  .brick-sublabel { font-size: 0.6rem; opacity: 0.85; letter-spacing: 0.05em; }
+
+  /* === STATS STRIP === */
+  .stats-strip {
+    position: relative;
+    z-index: 1;
+    background: var(--charcoal);
+    padding: 3.5rem 2rem;
+  }
+
+  .stats-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .stat-item { animation: fadeUp 0.6s ease-out both; }
+  .stat-item:nth-child(2) { animation-delay: 0.1s; }
+  .stat-item:nth-child(3) { animation-delay: 0.2s; }
+
+  .stat-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    color: var(--gold);
+    margin-bottom: 0.35rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: rgba(250, 245, 240, 0.7);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+  }
+
+  /* === HOW IT WORKS === */
+  .how-section {
+    position: relative;
+    z-index: 1;
+    padding: 6rem 2rem;
+    background: var(--cream);
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .section-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    color: var(--charcoal);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  .section-header p {
+    font-size: 1.05rem;
+    color: var(--warm-gray);
+    max-width: 550px;
+    margin: 0 auto;
+  }
+
+  .steps {
+    max-width: 950px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+
+  .step {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    border-radius: 12px;
+    background: white;
+    border: 1px solid rgba(196, 90, 60, 0.08);
+    transition: all 0.3s ease;
+  }
+
+  .step:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(44, 36, 32, 0.08);
+    border-color: rgba(196, 90, 60, 0.15);
+  }
+
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: var(--terracotta);
+    color: white;
+    border-radius: 50%;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .step h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    color: var(--charcoal);
+    margin-bottom: 0.75rem;
+  }
+
+  .step p {
+    font-size: 0.92rem;
+    color: var(--warm-gray);
+    line-height: 1.65;
+  }
+
+  /* === WHY SECTION === */
+  .why-section {
+    position: relative;
+    z-index: 1;
+    padding: 5rem 2rem 6rem;
+    background: var(--cream-dark);
+  }
+
+  .why-grid {
+    max-width: 950px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.75rem;
+  }
+
+  .why-card {
+    padding: 2rem;
+    border-radius: 10px;
+    background: white;
+    border-left: 4px solid var(--terracotta);
+    transition: all 0.3s ease;
+  }
+
+  .why-card:hover { transform: translateX(4px); }
+
+  .why-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--charcoal);
+    margin-bottom: 0.5rem;
+  }
+
+  .why-card p {
+    font-size: 0.9rem;
+    color: var(--warm-gray);
+    line-height: 1.6;
+  }
+
+  /* === CTA SECTION === */
+  .cta-section {
+    position: relative;
+    z-index: 1;
+    padding: 6rem 2rem;
+    background: var(--charcoal);
+    text-align: center;
+  }
+
+  .cta-section h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    color: var(--cream);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .cta-section p {
+    color: rgba(250, 245, 240, 0.7);
+    font-size: 1.05rem;
+    max-width: 480px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.65;
+  }
+
+  .btn-primary-light {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--gold);
+    color: var(--charcoal);
+    padding: 1rem 2.25rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.05rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary-light:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 168, 75, 0.35);
+  }
+
+  /* === FOOTER === */
+  footer {
+    position: relative;
+    z-index: 1;
+    background: #1C1815;
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+
+  .footer-content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .footer-brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--terracotta-light);
+    margin-bottom: 0.5rem;
+  }
+
+  .footer-text {
+    font-size: 0.8rem;
+    color: rgba(250, 245, 240, 0.35);
+    line-height: 1.6;
+  }
+
+  .footer-founder {
+    font-size: 0.82rem;
+    color: rgba(250, 245, 240, 0.5);
+    margin-bottom: 0.75rem;
+  }
+
+  .footer-email {
+    color: var(--terracotta-light);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .footer-email:hover { color: var(--gold); }
+
+  /* === ANIMATIONS === */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 768px) {
+    .hero-inner {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+      text-align: center;
+    }
+    .hero-description { margin-left: auto; margin-right: auto; }
+    .cta-group { justify-content: center; }
+    .tagline { justify-content: center; }
+    .tagline::before { display: none; }
+    .stats-inner { grid-template-columns: 1fr; gap: 1.5rem; }
+    .steps { grid-template-columns: 1fr; max-width: 400px; }
+    .why-grid { grid-template-columns: 1fr; }
+    .brick-block { max-width: 280px; margin: 0 auto; }
+    nav { padding: 1rem 1.25rem; }
+    .logo { font-size: 1.25rem; }
+    .nav-cta { padding: 0.5rem 1rem; font-size: 0.8rem; }
+    .hero { padding: 7rem 1.25rem 3rem; }
+  }
+
+  @media (max-width: 480px) {
+    .brick-block { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Lay Your <span>Bricks</span></a>
+  <a href="#waitlist" class="nav-cta">Join the Waitlist</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="tagline">Build the Future, Brick by Brick</div>
+      <h1>Invest in <em>your neighborhood.</em> Build wealth <em>together.</em></h1>
+      <p class="hero-description">Lay Your Bricks lets you invest as little as $50 into Baltimore small businesses you believe in — and earn 5–10% returns while keeping capital in your community.</p>
+      <div class="cta-group">
+        <a href="#waitlist" class="btn-primary">
+          Join the Waitlist
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <a href="#how" class="btn-secondary">How it works ↓</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="brick-block">
+        <div class="brick brick-1">
+          <div class="brick-label">☕</div>
+          <div class="brick-sublabel">Café</div>
+        </div>
+        <div class="brick brick-2">
+          <div class="brick-label">✂️</div>
+          <div class="brick-sublabel">Barber</div>
+        </div>
+        <div class="brick brick-3">
+          <div class="brick-label">🛒</div>
+          <div class="brick-sublabel">Grocery</div>
+        </div>
+        <div class="brick brick-4">
+          <div class="brick-label">🌱</div>
+          <div class="brick-sublabel">Startup</div>
+        </div>
+        <div class="brick brick-5">
+          <div class="brick-label">🍽️</div>
+          <div class="brick-sublabel">Restaurant</div>
+        </div>
+        <div class="brick brick-6">
+          <div class="brick-label">🔧</div>
+          <div class="brick-sublabel">Services</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-number">83%</div>
+      <div class="stat-label">of Baltimore small businesses never<br>access traditional capital</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">$50</div>
+      <div class="stat-label">minimum investment to back<br>a business on your block</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">5–10%</div>
+      <div class="stat-label">target annual returns<br>for community investors</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="section-header">
+    <h2>How It Works</h2>
+    <p>Community investing made simple — from your neighborhood to your portfolio.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-number">1</div>
+      <h3>Browse Your Block</h3>
+      <p>Explore local businesses raising capital in your neighborhood. See their story, their plan, and exactly how your investment helps.</p>
+    </div>
+    <div class="step">
+      <div class="step-number">2</div>
+      <h3>Invest from $50</h3>
+      <p>Choose the businesses you believe in and invest what you're comfortable with. No accreditation required. No Wall Street middlemen.</p>
+    </div>
+    <div class="step">
+      <div class="step-number">3</div>
+      <h3>Earn & Watch Grow</h3>
+      <p>Receive returns as businesses pay back their loans. Track your impact on the community — and your portfolio — in real time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHY LYB -->
+<section class="why-section">
+  <div class="section-header">
+    <h2>Why Lay Your Bricks?</h2>
+    <p>Capital should circulate in communities, not just flow out of them.</p>
+  </div>
+  <div class="why-grid">
+    <div class="why-card">
+      <h3>Built for Everyday Investors</h3>
+      <p>You don't need $100,000 or a financial advisor. Start with $50 and invest in what you know — the businesses you already support.</p>
+    </div>
+    <div class="why-card">
+      <h3>Hyperlocal by Design</h3>
+      <p>This isn't a national algorithm. Lay Your Bricks starts in Baltimore — because the distance between investor and investment should be measured in blocks, not ticker symbols.</p>
+    </div>
+    <div class="why-card">
+      <h3>Real Returns, Real Impact</h3>
+      <p>Community investing isn't charity. Target 5–10% returns while every dollar recirculates locally at 3–4x the rate of money spent at chains.</p>
+    </div>
+    <div class="why-card">
+      <h3>Transparent & Accountable</h3>
+      <p>Every business is vetted. Every dollar is tracked. Built-in education, compliance tools, and incentives keep the ecosystem healthy.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / WAITLIST -->
+<section class="cta-section" id="waitlist">
+  <h2>Be First on the Block</h2>
+  <p>Lay Your Bricks is launching in Baltimore. Join the waitlist to get early access — whether you want to invest or raise capital for your business.</p>
+  <!-- =============================================
+       REPLACE THE LINK BELOW WITH YOUR GOOGLE FORM URL
+       ============================================= -->
+  <a href="https://docs.google.com/forms/d/e/1FAIpQLSd4UhLxCHde-W36Q5pVECXRmTy4NAaIh3TiuBbVwqiBkFlh2A/viewform" target="_blank" class="btn-primary-light">
+    Join the Waitlist
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-content">
+    <div class="footer-brand">Lay Your Bricks</div>
+    <div class="footer-founder">Founded by Stanislav Mitchell · Baltimore, MD</div>
+    <div class="footer-text">
+      Build the Future, Brick by Brick.
+      <br>Lay Your Bricks is currently in development. Waitlist signup does not constitute an investment offer or guarantee.
+      <br>All investments involve risk, including possible loss of principal.
+      <br><br>
+      <a href="mailto:contact@layyourbricks.com" class="footer-email">contact@layyourbricks.com</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
