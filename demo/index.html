@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lay Your Bricks — Platform Demo</title>
+  <meta name="description" content="Lay Your Bricks platform demo — explore the community investment experience." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect x='2' y='4' width='9' height='6' rx='1' fill='%23C45A3C'/><rect x='13' y='4' width='9' height='6' rx='1' fill='%23C45A3C' opacity='.7'/><rect x='2' y='12' width='6' height='6' rx='1' fill='%23C45A3C' opacity='.7'/><rect x='10' y='12' width='6' height='6' rx='1' fill='%23C45A3C'/></svg>" />
+  <style>
+    html, body, #root { margin: 0; padding: 0; min-height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+
+// ─── Brand Tokens ───
+const T = {
+  terracotta: "#C45A3C",
+  terracottaLight: "#D4725A",
+  terracottaDark: "#A8432B",
+  charcoal: "#2C2420",
+  charcoalLight: "#3D342F",
+  gold: "#D4A84B",
+  goldLight: "#E4C47A",
+  sage: "#7A9A7E",
+  sageLight: "#A3BFA6",
+  cream: "#FAF6F0",
+  creamDark: "#F0E8DC",
+  white: "#FFFFFF",
+  warmGray: "#8A7F76",
+  lightBorder: "#E8E0D6",
+};
+
+// ─── Verticals (from survey) ───
+const VERTICALS = [
+  {
+    id: "restaurants",
+    label: "Restaurants & Cafes",
+    short: "Eats & Drinks",
+    desc: "Restaurants, cafes, bakeries, food trucks, and catering businesses. From neighborhood diners to specialty coffee roasters — the places that feed your community.",
+    color: "#E07850",
+    buildingH: 150,
+    floors: 2,
+    icon: "🍽",
+    awningColor: "#D46040",
+  },
+  {
+    id: "retail",
+    label: "Retail & Clothing",
+    short: "Retail",
+    desc: "Clothing stores, boutiques, shoe shops, and specialty retail. Independent retailers that keep style and selection local.",
+    color: "#6B8EAD",
+    buildingH: 130,
+    floors: 2,
+    icon: "👔",
+    awningColor: "#5A7D9C",
+  },
+  {
+    id: "beauty",
+    label: "Barbershops & Beauty Salons",
+    short: "Beauty & Barber",
+    desc: "Barbershops, hair salons, nail studios, and beauty supply stores. Community anchors where relationships are built one chair at a time.",
+    color: "#C47EAA",
+    buildingH: 120,
+    floors: 1,
+    icon: "💈",
+    awningColor: "#B06E9A",
+  },
+  {
+    id: "grocery",
+    label: "Grocery & Corner Stores",
+    short: "Grocery & Market",
+    desc: "Corner stores, bodegas, specialty markets, and neighborhood grocers. The everyday essentials that keep a block running.",
+    color: "#6AAA6A",
+    buildingH: 110,
+    floors: 1,
+    icon: "🏪",
+    awningColor: "#5A9A5A",
+  },
+  {
+    id: "bluecollar",
+    label: "Blue Collar Services",
+    short: "Trades & Repair",
+    desc: "Plumbing, HVAC, electrical, auto repair, and construction. Skilled trades that build and maintain the physical infrastructure of your neighborhood.",
+    color: "#7A8A9A",
+    buildingH: 140,
+    floors: 2,
+    icon: "🔧",
+    awningColor: "#6A7A8A",
+  },
+  {
+    id: "services",
+    label: "Service Businesses",
+    short: "Services",
+    desc: "Dry cleaners, laundromats, tax preparation, printing shops, and professional services. The businesses that make daily life work.",
+    color: "#AA9A6A",
+    buildingH: 115,
+    floors: 1,
+    icon: "🧹",
+    awningColor: "#9A8A5A",
+  },
+  {
+    id: "startups",
+    label: "Startups & Tech",
+    short: "Tech & Startups",
+    desc: "Software companies, app developers, engineering firms, and tech-enabled businesses. Innovation rooted in Baltimore, building the next generation of local industry.",
+    color: "#5A8AAA",
+    buildingH: 165,
+    floors: 3,
+    icon: "💡",
+    awningColor: "#4A7A9A",
+  },
+  {
+    id: "health",
+    label: "Health & Wellness",
+    short: "Health & Wellness",
+    desc: "Gyms, yoga studios, physical therapy practices, wellness centers, and mental health services. Investing in community health, one visit at a time.",
+    color: "#7AAA8A",
+    buildingH: 155,
+    floors: 2,
+    icon: "🏋️",
+    awningColor: "#6A9A7A",
+  },
+  {
+    id: "arts",
+    label: "Arts & Creative",
+    short: "Arts & Creative",
+    desc: "Art studios, music schools, dance academies, theaters, galleries, and creative workshops. Culture is infrastructure — and it deserves investment.",
+    color: "#AA7A6A",
+    buildingH: 135,
+    floors: 2,
+    icon: "🎨",
+    awningColor: "#9A6A5A",
+  },
+];
+
+// ─── Mock Businesses (expanded with vertical tags) ───
+const BUSINESSES = [
+  {
+    id: 1, name: "Volta Coffee & Tea", type: "Specialty Coffee Roaster", vertical: "restaurants",
+    neighborhood: "Hampden", owner: "Marcus & Elena Park",
+    ask: 18000, raised: 14220, investors: 47, rate: 7.5, term: 36,
+    purpose: "Expanding roasting capacity and adding a second espresso bar to meet demand from the 36th Street corridor.",
+    story: "What started as a weekend farmers market stand in 2019 grew into a full café by 2021. Now serving 200+ customers daily, Volta sources beans directly from farms in Colombia and Ethiopia.",
+    yearsInBusiness: 5, employees: 8, monthlyRevenue: "$22,000", daysLeft: 18, createdAt: 6,
+  },
+  {
+    id: 2, name: "Chesapeake Mechanical", type: "HVAC & Plumbing Services", vertical: "bluecollar",
+    neighborhood: "Canton", owner: "David Okafor",
+    ask: 35000, raised: 21700, investors: 32, rate: 8.0, term: 48,
+    purpose: "Purchasing a third service van and diagnostic equipment to reduce wait times for residential and commercial clients.",
+    story: "David started Chesapeake Mechanical after 12 years as a licensed journeyman. His company now serves over 400 residential accounts and 15 commercial contracts across Baltimore.",
+    yearsInBusiness: 7, employees: 11, monthlyRevenue: "$48,000", daysLeft: 24, createdAt: 5,
+  },
+  {
+    id: 3, name: "Page & Pen Bookshop", type: "Independent Bookstore & Event Space", vertical: "retail",
+    neighborhood: "Remington", owner: "Sarah Lindgren",
+    ask: 12000, raised: 11400, investors: 73, rate: 6.5, term: 24,
+    purpose: "Converting the second floor into a community event space for author readings, book clubs, and workshops.",
+    story: "Page & Pen has been Remington's literary hub since 2020, hosting 60+ community events per year. The expansion will double event capacity and add a children's reading corner.",
+    yearsInBusiness: 4, employees: 5, monthlyRevenue: "$14,000", daysLeft: 6, createdAt: 10,
+  },
+  {
+    id: 4, name: "Harbor Greens Urban Farm", type: "Urban Agriculture & Distribution", vertical: "grocery",
+    neighborhood: "Woodberry", owner: "James & Priya Whitfield",
+    ask: 25000, raised: 8750, investors: 19, rate: 7.0, term: 36,
+    purpose: "Building a year-round greenhouse and cold storage to supply produce to 12 local restaurants and 3 corner stores.",
+    story: "Harbor Greens transforms vacant lots into productive urban farms. Starting with a single quarter-acre plot, the operation now cultivates 2.5 acres and supplies fresh produce to food-insecure neighborhoods.",
+    yearsInBusiness: 3, employees: 6, monthlyRevenue: "$11,000", daysLeft: 31, createdAt: 2,
+  },
+  {
+    id: 5, name: "Studio A Dance Academy", type: "Dance Education & Performance", vertical: "arts",
+    neighborhood: "Charles Village", owner: "Adrienne Cole",
+    ask: 15000, raised: 15000, investors: 58, rate: 6.0, term: 30,
+    purpose: "Upgrading studio flooring and sound system, plus launching a scholarship program for students from underserved neighborhoods.",
+    story: "Adrienne trained at Peabody before founding Studio A in 2018. The academy now teaches 180 students weekly across ballet, contemporary, hip-hop, and West African dance styles.",
+    yearsInBusiness: 6, employees: 9, monthlyRevenue: "$19,000", daysLeft: 0, funded: true, createdAt: 12,
+  },
+  {
+    id: 6, name: "Flex Fitness Club", type: "Community Gym & Training", vertical: "health",
+    neighborhood: "Federal Hill", owner: "Tony Reeves",
+    ask: 22000, raised: 16500, investors: 41, rate: 7.0, term: 36,
+    purpose: "Adding a dedicated group fitness studio and purchasing new equipment to serve the growing evening membership base.",
+    story: "Tony opened Flex in a 2,000 sq ft space in 2020 and grew it to 5,500 sq ft by 2023. With 350 active members and a waitlist for evening classes, the gym is a neighborhood fixture.",
+    yearsInBusiness: 4, employees: 7, monthlyRevenue: "$26,000", daysLeft: 14, createdAt: 4,
+  },
+  {
+    id: 7, name: "Bright Stitch Tailoring", type: "Alterations & Custom Clothing", vertical: "services",
+    neighborhood: "Fells Point", owner: "Lien Nguyen",
+    ask: 8000, raised: 5600, investors: 28, rate: 6.0, term: 24,
+    purpose: "Purchasing an industrial embroidery machine and expanding into custom uniforms for local restaurants and businesses.",
+    story: "Lien has been tailoring in Baltimore for 18 years. Bright Stitch serves 200+ regular clients, from wedding alterations to corporate uniforms, and is the go-to tailor for three neighborhood restaurants.",
+    yearsInBusiness: 10, employees: 3, monthlyRevenue: "$9,000", daysLeft: 20, createdAt: 7,
+  },
+  {
+    id: 8, name: "Clean Cuts Barbershop", type: "Full-Service Barbershop", vertical: "beauty",
+    neighborhood: "Pigtown", owner: "Andre Williams",
+    ask: 10000, raised: 7800, investors: 36, rate: 6.5, term: 24,
+    purpose: "Renovating the shop interior and adding two new stations to reduce wait times on weekends.",
+    story: "Clean Cuts has been a Pigtown staple since 2017. Andre and his three barbers serve over 150 clients weekly. The shop also hosts a free monthly financial literacy workshop.",
+    yearsInBusiness: 7, employees: 4, monthlyRevenue: "$12,000", daysLeft: 11, createdAt: 8,
+  },
+  {
+    id: 9, name: "ByteForge Labs", type: "Software Development Studio", vertical: "startups",
+    neighborhood: "Station North", owner: "Kira Patel & Sam Torres",
+    ask: 30000, raised: 12000, investors: 22, rate: 8.5, term: 48,
+    purpose: "Hiring two junior developers and securing office space to scale from freelance projects to a full product studio.",
+    story: "Kira and Sam met at a Baltimore hackathon in 2021 and started freelancing together. ByteForge now builds custom software for 8 local businesses and is developing its own inventory management tool for small retailers.",
+    yearsInBusiness: 3, employees: 4, monthlyRevenue: "$18,000", daysLeft: 28, createdAt: 1,
+  },
+];
+
+const PORTFOLIO = [
+  { name: "Volta Coffee & Tea", invested: 150, rate: 7.5, paid: 38.25, status: "Active", next: "Apr 15" },
+  { name: "Page & Pen Bookshop", invested: 100, rate: 6.5, paid: 22.10, status: "Active", next: "Apr 1" },
+  { name: "Studio A Dance Academy", invested: 200, rate: 6.0, paid: 84.00, status: "Active", next: "Apr 15" },
+];
+
+const CIE_MODULES = [
+  { id: 1, title: "What Is Community Lending?", desc: "How your money works when you invest locally — and how it comes back to you.", duration: "5 min", completed: true },
+  { id: 2, title: "Risk & Return Basics", desc: "Understanding interest rates, loan terms, and what happens if a business struggles.", duration: "8 min", completed: true },
+  { id: 3, title: "Reading a Business Profile", desc: "How to evaluate a loan request: revenue, purpose, repayment plan, and community impact.", duration: "6 min", completed: false },
+  { id: 4, title: "Building Your Portfolio", desc: "Diversification strategies for community investors — even at $50.", duration: "7 min", completed: false },
+  { id: 5, title: "Your Rights as an Investor", desc: "Protections, reporting requirements, and what to do if something goes wrong.", duration: "5 min", completed: false },
+];
+
+// ─── Utility ───
+const pct = (raised, ask) => Math.min(100, Math.round((raised / ask) * 100));
+const fmt = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const fmtFull = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
+
+// ─── Icons ───
+const BrickIcon = ({ size = 20, color = T.terracotta }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <rect x="2" y="4" width="9" height="6" rx="1" fill={color} opacity="0.9" />
+    <rect x="13" y="4" width="9" height="6" rx="1" fill={color} opacity="0.7" />
+    <rect x="2" y="12" width="6" height="6" rx="1" fill={color} opacity="0.7" />
+    <rect x="10" y="12" width="6" height="6" rx="1" fill={color} opacity="0.9" />
+    <rect x="18" y="12" width="4" height="6" rx="1" fill={color} opacity="0.6" />
+  </svg>
+);
+const ChevronRight = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+);
+const CheckCircle = ({ color = T.sage }) => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" fill={color} /><path d="M5.5 9.5l2 2 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+);
+
+// ─── CSS ───
+const baseStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root { --terracotta: ${T.terracotta}; --charcoal: ${T.charcoal}; --gold: ${T.gold}; --sage: ${T.sage}; --cream: ${T.cream}; }
+  body, #root { font-family: 'DM Sans', sans-serif; color: ${T.charcoal}; background: ${T.cream}; -webkit-font-smoothing: antialiased; }
+  .serif { font-family: 'DM Serif Display', serif; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes progressFill { from { width: 0; } }
+  @keyframes carBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+  .fade-up { animation: fadeUp 0.5s ease-out forwards; }
+  .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+  button { font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; outline: none; }
+  button:focus-visible { outline: 2px solid ${T.gold}; outline-offset: 2px; }
+  .street-scene::-webkit-scrollbar { display: none; }
+`;
+
+// ─── Shared UI ───
+function ProgressBar({ value, height = 8, color = T.terracotta, bg = T.lightBorder }) {
+  return (
+    <div style={{ width: "100%", height, borderRadius: height, background: bg, overflow: "hidden" }}>
+      <div style={{ width: `${value}%`, height: "100%", borderRadius: height, background: value >= 100 ? T.sage : color, animation: "progressFill 1s ease-out", transition: "width 0.6s ease" }} />
+    </div>
+  );
+}
+
+function Tag({ children, color = T.charcoal, bg = T.creamDark }) {
+  return <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 4, fontSize: 11, fontWeight: 600, letterSpacing: "0.03em", textTransform: "uppercase", color, background: bg }}>{children}</span>;
+}
+
+function Topbar({ view, setView, setSelectedBiz, setSelectedVertical }) {
+  const navItems = [
+    { key: "explore", label: "Explore" },
+    { key: "dashboard", label: "My Portfolio" },
+    { key: "apply", label: "For Businesses" },
+    { key: "learn", label: "Learn" },
+  ];
+  return (
+    <div style={{ position: "sticky", top: 0, zIndex: 100, background: T.charcoal, borderBottom: `3px solid ${T.terracotta}`, padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={() => { setView("explore"); setSelectedBiz(null); setSelectedVertical(null); }}>
+        <BrickIcon size={26} color={T.terracotta} />
+        <span className="serif" style={{ color: T.cream, fontSize: 20, letterSpacing: "-0.02em" }}>Lay Your Bricks</span>
+      </div>
+      <div style={{ display: "flex", gap: 4 }}>
+        {navItems.map(n => (
+          <button key={n.key} onClick={() => { setView(n.key); setSelectedBiz(null); setSelectedVertical(null); }} style={{ padding: "8px 16px", borderRadius: 6, fontSize: 14, fontWeight: view === n.key ? 600 : 400, color: view === n.key ? T.cream : T.warmGray, background: view === n.key ? T.charcoalLight : "transparent", transition: "all 0.2s" }}>
+            {n.label}
+          </button>
+        ))}
+      </div>
+      <button style={{ background: T.terracotta, color: T.cream, padding: "8px 18px", borderRadius: 6, fontSize: 13, fontWeight: 600, transition: "background 0.2s" }}
+        onMouseEnter={e => e.target.style.background = T.terracottaDark}
+        onMouseLeave={e => e.target.style.background = T.terracotta}>
+        Sign In
+      </button>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────
+// 2D NEIGHBORHOOD STREET VIEW
+// ──────────────────────────────────────────────
+function Building({ vert, onClick, isHovered, onHover, onLeave }) {
+  const w = 140;
+  const h = vert.buildingH;
+  const doorW = 24;
+  const doorH = 36;
+  const windowW = 22;
+  const windowH = 18;
+
+  return (
+    <div
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
+      onClick={onClick}
+      style={{
+        width: w,
+        flexShrink: 0,
+        cursor: "pointer",
+        transition: "transform 0.25s ease",
+        transform: isHovered ? "translateY(-8px)" : "translateY(0)",
+        position: "relative",
+      }}
+    >
+      <div style={{ textAlign: "center", marginBottom: 6, opacity: isHovered ? 1 : 0.8, transition: "opacity 0.2s" }}>
+        <div style={{ fontSize: 18, marginBottom: 2 }}>{vert.icon}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: T.charcoal, lineHeight: 1.2 }}>{vert.short}</div>
+      </div>
+
+      <svg width={w} height={h + 30} viewBox={`0 0 ${w} ${h + 30}`}>
+        <rect x="5" y="25" width={w - 10} height={h} rx="2" fill={vert.color} />
+        <rect x="5" y="25" width={w - 10} height={h} rx="2" fill="rgba(0,0,0,0.05)" />
+        <rect x="2" y="22" width={w - 4} height="6" rx="1" fill={vert.color} />
+        <rect x="2" y="22" width={w - 4} height="6" rx="1" fill="rgba(0,0,0,0.15)" />
+        <path d={`M 10 ${h - 10} L ${w - 10} ${h - 10} L ${w - 5} ${h} L 5 ${h} Z`} fill={vert.awningColor} />
+        {vert.floors >= 1 && (
+          <>
+            <rect x="18" y="42" width={windowW} height={windowH} rx="2" fill="rgba(255,255,255,0.85)" />
+            <rect x="56" y="42" width={windowW} height={windowH} rx="2" fill="rgba(255,255,255,0.85)" />
+            <rect x="94" y="42" width={windowW} height={windowH} rx="2" fill="rgba(255,255,255,0.85)" />
+            <line x1="29" y1="42" x2="29" y2="60" stroke={vert.color} strokeWidth="1" opacity="0.4" />
+            <line x1="67" y1="42" x2="67" y2="60" stroke={vert.color} strokeWidth="1" opacity="0.4" />
+            <line x1="105" y1="42" x2="105" y2="60" stroke={vert.color} strokeWidth="1" opacity="0.4" />
+          </>
+        )}
+        {vert.floors >= 2 && (
+          <>
+            <rect x="18" y="72" width={windowW} height={windowH} rx="2" fill="rgba(255,255,255,0.75)" />
+            <rect x="56" y="72" width={windowW} height={windowH} rx="2" fill="rgba(255,255,255,0.75)" />
+            <rect x="94" y="72" width={windowW} height={windowH} rx="2" fill="rgba(255,255,255,0.75)" />
+          </>
+        )}
+        {vert.floors >= 3 && (
+          <>
+            <rect x="18" y="102" width={windowW} height={windowH} rx="2" fill="rgba(255,255,255,0.65)" />
+            <rect x="56" y="102" width={windowW} height={windowH} rx="2" fill="rgba(255,255,255,0.65)" />
+            <rect x="94" y="102" width={windowW} height={windowH} rx="2" fill="rgba(255,255,255,0.65)" />
+          </>
+        )}
+        <rect x={(w - doorW) / 2} y={h + 25 - doorH} width={doorW} height={doorH} rx="2" fill="rgba(0,0,0,0.25)" />
+        <rect x={(w - doorW) / 2 + 2} y={h + 25 - doorH + 2} width={doorW - 4} height={doorH - 2} rx="1" fill="rgba(255,255,255,0.3)" />
+        <circle cx={(w + doorW) / 2 - 6} cy={h + 25 - doorH / 2 + 4} r="2" fill="rgba(255,255,255,0.6)" />
+        {isHovered && <rect x="5" y="25" width={w - 10} height={h} rx="2" fill="rgba(255,255,255,0.12)" />}
+      </svg>
+    </div>
+  );
+}
+
+function CarSVG() {
+  return (
+    <svg width="72" height="36" viewBox="0 0 72 36">
+      <rect x="4" y="14" width="64" height="16" rx="4" fill={T.terracotta} />
+      <path d="M18 14 L24 4 L52 4 L58 14" fill={T.terracottaDark} />
+      <path d="M26 6 L22 14 L36 14 L36 6 Z" fill="rgba(200,230,255,0.8)" />
+      <path d="M38 6 L38 14 L54 14 L50 6 Z" fill="rgba(200,230,255,0.8)" />
+      <circle cx="18" cy="30" r="6" fill={T.charcoal} />
+      <circle cx="18" cy="30" r="3" fill={T.warmGray} />
+      <circle cx="54" cy="30" r="6" fill={T.charcoal} />
+      <circle cx="54" cy="30" r="3" fill={T.warmGray} />
+      <rect x="64" y="18" width="5" height="4" rx="1" fill={T.gold} />
+      <rect x="3" y="18" width="4" height="4" rx="1" fill="#CC3333" />
+    </svg>
+  );
+}
+
+function NeighborhoodView({ onSelectVertical }) {
+  const scrollRef = useRef(null);
+  const [hoveredVert, setHoveredVert] = useState(null);
+  const [carPos, setCarPos] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef(null);
+  const dragCarStart = useRef(null);
+
+  const STREET_W = VERTICALS.length * 170 + 100;
+  const VISIBLE_W = typeof window !== "undefined" ? Math.min(window.innerWidth, 1100) : 900;
+  const maxScroll = Math.max(0, STREET_W - VISIBLE_W + 48);
+  const roadW = VISIBLE_W - 48;
+
+  const scrollTo = useCallback((pos) => {
+    const clamped = Math.max(0, Math.min(maxScroll, pos));
+    setCarPos(clamped);
+    if (scrollRef.current) scrollRef.current.scrollLeft = clamped;
+  }, [maxScroll]);
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+    dragStart.current = e.clientX || e.touches?.[0]?.clientX;
+    dragCarStart.current = carPos;
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDragging || dragStart.current === null) return;
+      const clientX = e.clientX || e.touches?.[0]?.clientX;
+      const delta = clientX - dragStart.current;
+      const scrollRatio = maxScroll / Math.max(1, roadW - 72);
+      scrollTo(dragCarStart.current + delta * scrollRatio);
+    };
+    const handleMouseUp = () => setIsDragging(false);
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("touchmove", handleMouseMove);
+      window.addEventListener("touchend", handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleMouseMove);
+      window.removeEventListener("touchend", handleMouseUp);
+    };
+  }, [isDragging, carPos, maxScroll, roadW, scrollTo]);
+
+  const handleScroll = () => {
+    if (!isDragging && scrollRef.current) setCarPos(scrollRef.current.scrollLeft);
+  };
+
+  const carLeft = maxScroll > 0 ? (carPos / maxScroll) * Math.max(0, roadW - 72) : 0;
+
+  return (
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px 0" }}>
+      <div className="fade-up" style={{ textAlign: "center", marginBottom: 28 }}>
+        <h1 className="serif" style={{ fontSize: 34, lineHeight: 1.2, marginBottom: 10 }}>Explore Your Block</h1>
+        <p style={{ color: T.warmGray, fontSize: 15, maxWidth: 520, margin: "0 auto", lineHeight: 1.6 }}>
+          Click on a building to discover businesses in that category. Drag the car to cruise down the street.
+        </p>
+      </div>
+
+      <div className="fade-up" style={{
+        animationDelay: "0.1s", animationFillMode: "backwards",
+        background: "linear-gradient(180deg, #B8D4E8 0%, #D4E4F0 40%, #E8EEF4 100%)",
+        borderRadius: "16px 16px 0 0", overflow: "hidden", position: "relative",
+      }}>
+        <div style={{ position: "absolute", top: 18, left: "15%", width: 80, height: 24, borderRadius: 12, background: "rgba(255,255,255,0.7)" }} />
+        <div style={{ position: "absolute", top: 28, left: "16%", width: 50, height: 18, borderRadius: 9, background: "rgba(255,255,255,0.7)" }} />
+        <div style={{ position: "absolute", top: 12, right: "20%", width: 100, height: 28, borderRadius: 14, background: "rgba(255,255,255,0.6)" }} />
+        <div style={{ position: "absolute", top: 22, right: "18%", width: 60, height: 20, borderRadius: 10, background: "rgba(255,255,255,0.6)" }} />
+
+        <div ref={scrollRef} onScroll={handleScroll} className="street-scene" style={{ overflowX: "auto", overflowY: "hidden", scrollBehavior: isDragging ? "auto" : "smooth", paddingTop: 40 }}>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 28, paddingLeft: 40, paddingRight: 40, width: STREET_W, minHeight: 260 }}>
+            {VERTICALS.map((v) => (
+              <Building key={v.id} vert={v} isHovered={hoveredVert === v.id}
+                onHover={() => setHoveredVert(v.id)} onLeave={() => setHoveredVert(null)}
+                onClick={() => onSelectVertical(v)} />
+            ))}
+          </div>
+        </div>
+        <div style={{ height: 18, background: "#D4C8B8", borderTop: "2px solid #C4B8A8" }} />
+      </div>
+
+      <div style={{ background: "#555", borderRadius: "0 0 16px 16px", padding: "10px 24px 14px", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 2, display: "flex", justifyContent: "space-around", transform: "translateY(-1px)" }}>
+          {Array.from({ length: 20 }).map((_, i) => <div key={i} style={{ width: 30, height: 2, background: "#FFD54F", opacity: 0.6 }} />)}
+        </div>
+        <div onMouseDown={handleMouseDown} onTouchStart={handleMouseDown} style={{
+          position: "relative", left: carLeft, width: 72,
+          cursor: isDragging ? "grabbing" : "grab",
+          animation: !isDragging ? "carBounce 2s ease-in-out infinite" : "none",
+          userSelect: "none", transition: isDragging ? "none" : "left 0.15s ease-out", zIndex: 2,
+        }}>
+          <CarSVG />
+        </div>
+      </div>
+
+      <div style={{ textAlign: "center", marginTop: 12, marginBottom: 8 }}>
+        <span style={{ fontSize: 12, color: T.warmGray }}>← Drag the car or scroll to see more →</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── VERTICAL POPUP ───
+function VerticalPopup({ vertical, onClose, onViewAll }) {
+  const bizCount = BUSINESSES.filter(b => b.vertical === vertical.id).length;
+  return (
+    <div className="fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(44,36,32,0.55)", backdropFilter: "blur(4px)" }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ background: T.white, borderRadius: 16, maxWidth: 480, width: "90%", overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.25)" }}>
+        <div style={{ height: 6, background: vertical.color }} />
+        <div style={{ padding: "28px 32px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: vertical.color + "18", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>{vertical.icon}</div>
+            <div>
+              <h2 className="serif" style={{ fontSize: 22, lineHeight: 1.2 }}>{vertical.label}</h2>
+              <span style={{ fontSize: 12, color: T.warmGray }}>{bizCount} business{bizCount !== 1 ? "es" : ""} listed</span>
+            </div>
+          </div>
+          <p style={{ fontSize: 14, lineHeight: 1.7, color: T.charcoal, marginBottom: 24 }}>{vertical.desc}</p>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={onViewAll} style={{ flex: 1, padding: "13px 0", borderRadius: 8, background: T.terracotta, color: T.cream, fontSize: 14, fontWeight: 600, transition: "background 0.2s" }}
+              onMouseEnter={e => e.target.style.background = T.terracottaDark} onMouseLeave={e => e.target.style.background = T.terracotta}>
+              View All Businesses →
+            </button>
+            <button onClick={onClose} style={{ padding: "13px 20px", borderRadius: 8, background: T.cream, color: T.charcoal, fontSize: 14, fontWeight: 500, border: `1px solid ${T.lightBorder}` }}>Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── FILTERED BROWSE VIEW ───
+function VerticalBrowseView({ vertical, businesses, onSelect, onBack }) {
+  const [sortBy, setSortBy] = useState("newest");
+  const filtered = businesses.filter(b => b.vertical === vertical.id);
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === "newest") return a.createdAt - b.createdAt;
+    if (sortBy === "oldest") return b.createdAt - a.createdAt;
+    if (sortBy === "highRate") return b.rate - a.rate;
+    if (sortBy === "lowRate") return a.rate - b.rate;
+    if (sortBy === "closestFund") return pct(b.raised, b.ask) - pct(a.raised, a.ask);
+    if (sortBy === "mostInvestors") return b.investors - a.investors;
+    return 0;
+  });
+  const sortOptions = [
+    { key: "newest", label: "Newest" }, { key: "oldest", label: "Oldest" },
+    { key: "highRate", label: "Highest Interest" }, { key: "lowRate", label: "Lowest Interest" },
+    { key: "closestFund", label: "Closest to Funded" }, { key: "mostInvestors", label: "Most Investors" },
+  ];
+
+  return (
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px" }}>
+      <button onClick={onBack} className="fade-in" style={{ display: "flex", alignItems: "center", gap: 6, background: "none", color: T.warmGray, fontSize: 13, fontWeight: 500, marginBottom: 20, padding: 0, transition: "color 0.2s" }}
+        onMouseEnter={e => e.target.style.color = T.terracotta} onMouseLeave={e => e.target.style.color = T.warmGray}>
+        ← Back to Explore
+      </button>
+      <div className="fade-up" style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
+        <div style={{ width: 44, height: 44, borderRadius: 10, background: vertical.color + "18", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{vertical.icon}</div>
+        <div>
+          <h1 className="serif" style={{ fontSize: 26 }}>{vertical.label}</h1>
+          <p style={{ fontSize: 13, color: T.warmGray }}>{sorted.length} business{sorted.length !== 1 ? "es" : ""} seeking community investment</p>
+        </div>
+      </div>
+      <div className="fade-up" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24, flexWrap: "wrap", animationDelay: "0.05s", animationFillMode: "backwards" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: T.warmGray, marginRight: 4 }}>Sort by:</span>
+        {sortOptions.map(s => (
+          <button key={s.key} onClick={() => setSortBy(s.key)} style={{
+            padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: sortBy === s.key ? 600 : 400,
+            color: sortBy === s.key ? T.cream : T.charcoal, background: sortBy === s.key ? vertical.color : T.white,
+            border: `1px solid ${sortBy === s.key ? vertical.color : T.lightBorder}`, transition: "all 0.2s",
+          }}>{s.label}</button>
+        ))}
+      </div>
+      {sorted.length === 0 ? (
+        <div className="fade-up" style={{ background: T.white, borderRadius: 12, border: `1px solid ${T.lightBorder}`, padding: "48px 32px", textAlign: "center" }}>
+          <div style={{ fontSize: 36, marginBottom: 12 }}>{vertical.icon}</div>
+          <h3 className="serif" style={{ fontSize: 20, marginBottom: 8 }}>No listings yet</h3>
+          <p style={{ color: T.warmGray, fontSize: 14, maxWidth: 360, margin: "0 auto", lineHeight: 1.6 }}>
+            We're actively recruiting {vertical.label.toLowerCase()} businesses in Baltimore. Know a business that should be here? Let us know.
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 20 }}>
+          {sorted.map((biz, i) => (
+            <div key={biz.id} className="fade-up" style={{
+              animationDelay: `${i * 0.08}s`, animationFillMode: "backwards",
+              background: T.white, borderRadius: 12, border: `1px solid ${T.lightBorder}`, overflow: "hidden", cursor: "pointer", transition: "transform 0.2s, box-shadow 0.2s",
+            }}
+              onClick={() => onSelect(biz)}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(44,36,32,0.1)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+              <div style={{ height: 6, background: biz.funded ? T.sage : vertical.color }} />
+              <div style={{ padding: "20px 22px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                  <div>
+                    <h3 className="serif" style={{ fontSize: 19, marginBottom: 2 }}>{biz.name}</h3>
+                    <p style={{ fontSize: 13, color: T.warmGray }}>{biz.type}</p>
+                  </div>
+                  {biz.funded ? <Tag color={T.sage} bg="#E8F5E9">Funded</Tag> : <Tag color={T.terracotta} bg="#FDEEE9">{biz.daysLeft}d left</Tag>}
+                </div>
+                <p style={{ fontSize: 12, color: T.warmGray, marginBottom: 14 }}>
+                  <span style={{ fontWeight: 600, color: T.charcoal }}>{biz.neighborhood}</span> &middot; Owned by {biz.owner}
+                </p>
+                <p style={{ fontSize: 13, color: T.charcoal, lineHeight: 1.5, marginBottom: 16, minHeight: 40 }}>
+                  {biz.purpose.length > 100 ? biz.purpose.slice(0, 100) + "…" : biz.purpose}
+                </p>
+                <ProgressBar value={pct(biz.raised, biz.ask)} />
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 13 }}>
+                  <span><strong>{fmt(biz.raised)}</strong> <span style={{ color: T.warmGray }}>of {fmt(biz.ask)}</span></span>
+                  <span style={{ color: T.warmGray }}>{biz.investors} investors</span>
+                </div>
+                <div style={{ display: "flex", gap: 16, marginTop: 14, paddingTop: 14, borderTop: `1px solid ${T.lightBorder}`, fontSize: 12, color: T.warmGray }}>
+                  <span><strong style={{ color: T.charcoal }}>{biz.rate}%</strong> interest</span>
+                  <span><strong style={{ color: T.charcoal }}>{biz.term}</strong> mo. term</span>
+                  <span><strong style={{ color: T.charcoal }}>{biz.yearsInBusiness}</strong> yrs in business</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── BUSINESS DETAIL VIEW ───
+function BusinessDetail({ biz, onBack }) {
+  const [investAmount, setInvestAmount] = useState(50);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const monthlyReturn = ((investAmount * (biz.rate / 100)) / 12).toFixed(2);
+  const totalReturn = (investAmount * (1 + (biz.rate / 100) * (biz.term / 12))).toFixed(2);
+
+  return (
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 24px" }}>
+      <button onClick={onBack} className="fade-in" style={{ display: "flex", alignItems: "center", gap: 6, background: "none", color: T.warmGray, fontSize: 13, fontWeight: 500, marginBottom: 20, padding: 0, transition: "color 0.2s" }}
+        onMouseEnter={e => e.target.style.color = T.terracotta} onMouseLeave={e => e.target.style.color = T.warmGray}>
+        ← Back
+      </button>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 28 }}>
+        <div className="fade-up">
+          <div style={{ height: 6, borderRadius: "12px 12px 0 0", background: biz.funded ? T.sage : `linear-gradient(90deg, ${T.terracotta}, ${T.gold})` }} />
+          <div style={{ background: T.white, borderRadius: "0 0 12px 12px", border: `1px solid ${T.lightBorder}`, borderTop: "none", padding: "28px 32px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+              <h1 className="serif" style={{ fontSize: 28 }}>{biz.name}</h1>
+              {biz.funded ? <Tag color={T.sage} bg="#E8F5E9">Fully Funded</Tag> : <Tag color={T.terracotta} bg="#FDEEE9">{biz.daysLeft} days left</Tag>}
+            </div>
+            <p style={{ color: T.warmGray, fontSize: 14, marginBottom: 20 }}>{biz.type} &middot; {biz.neighborhood} &middot; Owned by {biz.owner}</p>
+            <ProgressBar value={pct(biz.raised, biz.ask)} height={10} />
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 14, marginBottom: 28 }}>
+              <span><strong>{fmt(biz.raised)}</strong> raised of {fmt(biz.ask)}</span>
+              <span>{biz.investors} investors</span>
+            </div>
+            <h3 className="serif" style={{ fontSize: 18, marginBottom: 10 }}>The Story</h3>
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: T.charcoal, marginBottom: 24 }}>{biz.story}</p>
+            <h3 className="serif" style={{ fontSize: 18, marginBottom: 10 }}>Use of Funds</h3>
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: T.charcoal, marginBottom: 24 }}>{biz.purpose}</p>
+            <h3 className="serif" style={{ fontSize: 18, marginBottom: 14 }}>Business Snapshot</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              {[
+                { label: "Years in Business", val: biz.yearsInBusiness },
+                { label: "Employees", val: biz.employees },
+                { label: "Monthly Revenue", val: biz.monthlyRevenue },
+                { label: "Loan Term", val: `${biz.term} months` },
+              ].map((item, i) => (
+                <div key={i} style={{ background: T.cream, borderRadius: 8, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 11, color: T.warmGray, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>{item.label}</div>
+                  <div style={{ fontSize: 16, fontWeight: 600 }}>{item.val}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="fade-up" style={{ animationDelay: "0.15s", animationFillMode: "backwards" }}>
+          <div style={{ background: T.white, borderRadius: 12, border: `1px solid ${T.lightBorder}`, padding: 24, position: "sticky", top: 80 }}>
+            <h3 className="serif" style={{ fontSize: 18, marginBottom: 4 }}>Invest in {biz.name}</h3>
+            <p style={{ fontSize: 12, color: T.warmGray, marginBottom: 20 }}>{biz.rate}% annual return &middot; {biz.term}-month term</p>
+            {!biz.funded ? (
+              <>
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.warmGray, textTransform: "uppercase", letterSpacing: "0.05em" }}>Investment Amount</label>
+                <div style={{ display: "flex", gap: 8, marginTop: 8, marginBottom: 12 }}>
+                  {[50, 100, 250, 500].map(amt => (
+                    <button key={amt} onClick={() => setInvestAmount(amt)} style={{
+                      flex: 1, padding: "10px 0", borderRadius: 8, fontSize: 14, fontWeight: 600,
+                      background: investAmount === amt ? T.terracotta : T.cream, color: investAmount === amt ? T.cream : T.charcoal,
+                      border: `1px solid ${investAmount === amt ? T.terracotta : T.lightBorder}`, transition: "all 0.2s",
+                    }}>${amt}</button>
+                  ))}
+                </div>
+                <div style={{ background: T.cream, borderRadius: 8, padding: 16, marginBottom: 16 }}>
+                  <div style={{ fontSize: 11, color: T.warmGray, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>Estimated Returns</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}><span>Monthly interest</span><span style={{ fontWeight: 600 }}>${monthlyReturn}</span></div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}><span>Total repaid over {biz.term} mo.</span><span style={{ fontWeight: 600 }}>${totalReturn}</span></div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, paddingTop: 8, borderTop: `1px solid ${T.lightBorder}` }}><span style={{ fontWeight: 600 }}>Your profit</span><span style={{ fontWeight: 600, color: T.sage }}>{fmtFull(totalReturn - investAmount)}</span></div>
+                </div>
+                {!showConfirm ? (
+                  <button onClick={() => setShowConfirm(true)} style={{ width: "100%", padding: "14px 0", borderRadius: 8, background: T.terracotta, color: T.cream, fontSize: 15, fontWeight: 600, transition: "background 0.2s" }}
+                    onMouseEnter={e => e.target.style.background = T.terracottaDark} onMouseLeave={e => e.target.style.background = T.terracotta}>
+                    Invest {fmt(investAmount)}
+                  </button>
+                ) : (
+                  <div className="fade-in" style={{ background: "#F0FFF0", border: `1px solid ${T.sage}`, borderRadius: 8, padding: 16, textAlign: "center" }}>
+                    <CheckCircle />
+                    <p style={{ fontSize: 14, fontWeight: 600, marginTop: 8, color: T.charcoal }}>Investment Preview</p>
+                    <p style={{ fontSize: 12, color: T.warmGray, marginTop: 4 }}>This is a demo. In the live platform, you'd confirm your {fmt(investAmount)} investment here and begin earning {biz.rate}% annually.</p>
+                    <button onClick={() => setShowConfirm(false)} style={{ marginTop: 12, padding: "8px 20px", borderRadius: 6, background: T.charcoal, color: T.cream, fontSize: 13, fontWeight: 500 }}>Got it</button>
+                  </div>
+                )}
+                <p style={{ fontSize: 11, color: T.warmGray, marginTop: 12, lineHeight: 1.5, textAlign: "center" }}>All investments carry risk. Past performance does not guarantee future results. Review the C.I.E. learning modules before investing.</p>
+              </>
+            ) : (
+              <div style={{ background: "#F0FFF0", borderRadius: 8, padding: 20, textAlign: "center" }}>
+                <CheckCircle color={T.sage} />
+                <p className="serif" style={{ fontSize: 16, marginTop: 8 }}>Fully Funded!</p>
+                <p style={{ fontSize: 13, color: T.warmGray, marginTop: 4 }}>This loan was funded by {biz.investors} community investors.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── DASHBOARD ───
+function DashboardView() {
+  const totalInvested = PORTFOLIO.reduce((s, p) => s + p.invested, 0);
+  const totalEarned = PORTFOLIO.reduce((s, p) => s + p.paid, 0);
+  return (
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 24px" }}>
+      <h1 className="serif fade-up" style={{ fontSize: 28, marginBottom: 6 }}>Your Portfolio</h1>
+      <p className="fade-up" style={{ color: T.warmGray, fontSize: 14, marginBottom: 28, animationDelay: "0.05s", animationFillMode: "backwards" }}>Track your community investments and earnings.</p>
+      <div className="fade-up" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 32, animationDelay: "0.1s", animationFillMode: "backwards" }}>
+        {[
+          { label: "Total Invested", value: fmt(totalInvested), color: T.terracotta },
+          { label: "Interest Earned", value: fmtFull(totalEarned), color: T.sage },
+          { label: "Active Loans", value: PORTFOLIO.length, color: T.gold },
+          { label: "Avg. Return", value: "6.7%", color: T.charcoal },
+        ].map((card, i) => (
+          <div key={i} style={{ background: T.white, borderRadius: 12, padding: 20, border: `1px solid ${T.lightBorder}` }}>
+            <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em", color: T.warmGray, marginBottom: 8 }}>{card.label}</div>
+            <div className="serif" style={{ fontSize: 24, color: card.color }}>{card.value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="fade-up" style={{ background: T.white, borderRadius: 12, border: `1px solid ${T.lightBorder}`, overflow: "hidden", animationDelay: "0.2s", animationFillMode: "backwards" }}>
+        <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.lightBorder}` }}><h3 className="serif" style={{ fontSize: 17 }}>Active Investments</h3></div>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+          <thead><tr style={{ borderBottom: `1px solid ${T.lightBorder}` }}>
+            {["Business", "Invested", "Rate", "Interest Earned", "Status", "Next Payment"].map(h => (
+              <th key={h} style={{ padding: "12px 24px", textAlign: "left", fontSize: 11, fontWeight: 600, color: T.warmGray, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+            ))}
+          </tr></thead>
+          <tbody>
+            {PORTFOLIO.map((p, i) => (
+              <tr key={i} style={{ borderBottom: i < PORTFOLIO.length - 1 ? `1px solid ${T.lightBorder}` : "none", transition: "background 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.background = T.cream} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                <td style={{ padding: "14px 24px", fontWeight: 500 }}>{p.name}</td>
+                <td style={{ padding: "14px 24px" }}>{fmt(p.invested)}</td>
+                <td style={{ padding: "14px 24px" }}>{p.rate}%</td>
+                <td style={{ padding: "14px 24px", color: T.sage, fontWeight: 600 }}>+{fmtFull(p.paid)}</td>
+                <td style={{ padding: "14px 24px" }}><Tag color={T.sage} bg="#E8F5E9">{p.status}</Tag></td>
+                <td style={{ padding: "14px 24px", color: T.warmGray }}>{p.next}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="fade-up" style={{ marginTop: 24, background: `linear-gradient(135deg, ${T.charcoal}, ${T.charcoalLight})`, borderRadius: 12, padding: "28px 32px", position: "relative", overflow: "hidden", animationDelay: "0.3s", animationFillMode: "backwards" }}>
+        <div style={{ position: "absolute", bottom: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: T.terracotta, opacity: 0.1 }} />
+        <h3 className="serif" style={{ color: T.cream, fontSize: 18, marginBottom: 16 }}>Your Community Impact</h3>
+        <div style={{ display: "flex", gap: 40 }}>
+          {[{ val: "3", label: "Businesses Supported" }, { val: "23", label: "Jobs Backed" }, { val: fmt(totalInvested), label: "Kept in Baltimore" }].map((s, i) => (
+            <div key={i}><div className="serif" style={{ color: T.gold, fontSize: 26 }}>{s.val}</div><div style={{ color: T.warmGray, fontSize: 12, marginTop: 2 }}>{s.label}</div></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── APPLY VIEW ───
+function ApplyView() {
+  const [step, setStep] = useState(0);
+  const steps = [{ title: "Tell Us About Your Business" }, { title: "Loan Details" }, { title: "Your Story" }, { title: "Review & Submit" }];
+  return (
+    <div style={{ maxWidth: 760, margin: "0 auto", padding: "32px 24px" }}>
+      <div className="fade-up" style={{ textAlign: "center", marginBottom: 36 }}>
+        <h1 className="serif" style={{ fontSize: 28, marginBottom: 8 }}>Apply for Community Funding</h1>
+        <p style={{ color: T.warmGray, fontSize: 15, maxWidth: 500, margin: "0 auto", lineHeight: 1.6 }}>Get funded by the people who know your business best. No banks, no credit score gatekeeping. Just your neighbors investing in your growth.</p>
+      </div>
+      <div className="fade-up" style={{ display: "flex", justifyContent: "center", gap: 0, marginBottom: 36, animationDelay: "0.1s", animationFillMode: "backwards" }}>
+        {steps.map((s, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center" }}>
+            <div onClick={() => setStep(i)} style={{ width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: i <= step ? T.terracotta : T.creamDark, color: i <= step ? T.cream : T.warmGray, fontSize: 15, fontWeight: 600, cursor: "pointer", transition: "all 0.3s" }}>{i < step ? "✓" : i + 1}</div>
+            {i < steps.length - 1 && <div style={{ width: 60, height: 2, background: i < step ? T.terracotta : T.lightBorder, transition: "background 0.3s" }} />}
+          </div>
+        ))}
+      </div>
+      <div className="fade-up" style={{ background: T.white, borderRadius: 12, border: `1px solid ${T.lightBorder}`, padding: 32, animationDelay: "0.15s", animationFillMode: "backwards" }}>
+        <h2 className="serif" style={{ fontSize: 20, marginBottom: 4 }}>{steps[step].title}</h2>
+        <p style={{ color: T.warmGray, fontSize: 13, marginBottom: 24 }}>
+          {step === 0 && "Basic information about your business and operations."}
+          {step === 1 && "How much funding you need and how you plan to use it."}
+          {step === 2 && "Tell your community why your business matters."}
+          {step === 3 && "Review your application before submitting."}
+        </p>
+        {step === 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            {["Business Name", "Business Type", "Neighborhood", "Years in Operation", "Number of Employees", "Monthly Revenue (approximate)"].map((label, i) => (
+              <div key={i}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.charcoal, display: "block", marginBottom: 6 }}>{label}</label>
+                <input type="text" placeholder={`e.g., ${["Harbor Greens Urban Farm","Restaurant, Retail, Services","Hampden, Canton, Remington","3","8","$15,000"][i]}`}
+                  style={{ width: "100%", padding: "11px 14px", borderRadius: 8, border: `1px solid ${T.lightBorder}`, fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none", transition: "border-color 0.2s" }}
+                  onFocus={e => e.target.style.borderColor = T.terracotta} onBlur={e => e.target.style.borderColor = T.lightBorder} />
+              </div>
+            ))}
+          </div>
+        )}
+        {step === 1 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.charcoal, display: "block", marginBottom: 6 }}>How much are you looking to raise?</label>
+              <input type="text" placeholder="e.g., $15,000" style={{ width: "100%", padding: "11px 14px", borderRadius: 8, border: `1px solid ${T.lightBorder}`, fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none" }}
+                onFocus={e => e.target.style.borderColor = T.terracotta} onBlur={e => e.target.style.borderColor = T.lightBorder} />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.charcoal, display: "block", marginBottom: 6 }}>What will the funds be used for?</label>
+              <textarea placeholder="Describe specifically how you'll use this capital..." rows={4}
+                style={{ width: "100%", padding: "11px 14px", borderRadius: 8, border: `1px solid ${T.lightBorder}`, fontSize: 14, resize: "vertical", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
+                onFocus={e => e.target.style.borderColor = T.terracotta} onBlur={e => e.target.style.borderColor = T.lightBorder} />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.charcoal, display: "block", marginBottom: 6 }}>Preferred Loan Term</label>
+              <div style={{ display: "flex", gap: 10 }}>
+                {["12 months", "24 months", "36 months", "48 months"].map(t => (
+                  <button key={t} style={{ flex: 1, padding: 10, borderRadius: 8, fontSize: 13, fontWeight: 500, background: T.cream, border: `1px solid ${T.lightBorder}`, color: T.charcoal, transition: "all 0.2s" }}
+                    onMouseEnter={e => { e.target.style.borderColor = T.terracotta; e.target.style.background = "#FDEEE9"; }}
+                    onMouseLeave={e => { e.target.style.borderColor = T.lightBorder; e.target.style.background = T.cream; }}>{t}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        {step === 2 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.charcoal, display: "block", marginBottom: 6 }}>Your Business Story</label>
+              <textarea placeholder="Tell your community about your business. How did it start? What drives you?" rows={6}
+                style={{ width: "100%", padding: "11px 14px", borderRadius: 8, border: `1px solid ${T.lightBorder}`, fontSize: 14, resize: "vertical", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
+                onFocus={e => e.target.style.borderColor = T.terracotta} onBlur={e => e.target.style.borderColor = T.lightBorder} />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.charcoal, display: "block", marginBottom: 6 }}>What will this loan help you accomplish?</label>
+              <textarea placeholder="Paint a picture of what success looks like. How will the community benefit?" rows={4}
+                style={{ width: "100%", padding: "11px 14px", borderRadius: 8, border: `1px solid ${T.lightBorder}`, fontSize: 14, resize: "vertical", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
+                onFocus={e => e.target.style.borderColor = T.terracotta} onBlur={e => e.target.style.borderColor = T.lightBorder} />
+            </div>
+          </div>
+        )}
+        {step === 3 && (
+          <div>
+            <div style={{ background: T.cream, borderRadius: 10, padding: 24, marginBottom: 20 }}>
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: T.charcoal }}>Once submitted, the Lay Your Bricks team will review your application within 5 business days. We'll verify your business details and work with you to build a loan profile your community can invest in.</p>
+              <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+                {["Application reviewed by LYB team (3-5 business days)", "Verification call with a team member", "Loan profile built and published to community investors", "Funding period opens (typically 30-60 days)", "Funds disbursed upon successful raise"].map((item, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <div style={{ minWidth: 22, height: 22, borderRadius: "50%", background: T.terracotta, color: T.cream, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, marginTop: 1 }}>{i + 1}</div>
+                    <span style={{ fontSize: 13, color: T.charcoal }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button style={{ width: "100%", padding: 14, borderRadius: 8, background: T.terracotta, color: T.cream, fontSize: 15, fontWeight: 600, transition: "background 0.2s" }}
+              onMouseEnter={e => e.target.style.background = T.terracottaDark} onMouseLeave={e => e.target.style.background = T.terracotta}
+              onClick={() => { setStep(0); alert("Demo: Application submitted!"); }}>Submit Application</button>
+          </div>
+        )}
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 28, paddingTop: 20, borderTop: `1px solid ${T.lightBorder}` }}>
+          <button onClick={() => setStep(Math.max(0, step - 1))} style={{ padding: "10px 20px", borderRadius: 8, fontSize: 13, fontWeight: 500, background: T.cream, color: T.charcoal, border: `1px solid ${T.lightBorder}`, opacity: step === 0 ? 0.4 : 1, pointerEvents: step === 0 ? "none" : "auto" }}>← Previous</button>
+          {step < 3 && <button onClick={() => setStep(Math.min(3, step + 1))} style={{ padding: "10px 24px", borderRadius: 8, fontSize: 13, fontWeight: 600, background: T.charcoal, color: T.cream, display: "flex", alignItems: "center", gap: 6 }}>Next <ChevronRight /></button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── C.I.E. VIEW ───
+function CIEView() {
+  const [activeModule, setActiveModule] = useState(null);
+  const completedCount = CIE_MODULES.filter(m => m.completed).length;
+  return (
+    <div style={{ maxWidth: 760, margin: "0 auto", padding: "32px 24px" }}>
+      <div className="fade-up" style={{ marginBottom: 32 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+          <h1 className="serif" style={{ fontSize: 28 }}>C.I.E. Learning Center</h1>
+          <Tag color={T.gold} bg="#FFF8E8">Community Investor Education</Tag>
+        </div>
+        <p style={{ color: T.warmGray, fontSize: 14, lineHeight: 1.6, maxWidth: 560 }}>Before you invest, understand how community lending works. Complete these modules at your own pace to become a confident, informed community investor.</p>
+      </div>
+      <div className="fade-up" style={{ background: T.white, borderRadius: 12, border: `1px solid ${T.lightBorder}`, padding: "20px 24px", marginBottom: 24, animationDelay: "0.1s", animationFillMode: "backwards" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>{completedCount} of {CIE_MODULES.length} modules completed</span>
+          <span style={{ fontSize: 13, color: T.warmGray }}>{Math.round((completedCount / CIE_MODULES.length) * 100)}%</span>
+        </div>
+        <ProgressBar value={(completedCount / CIE_MODULES.length) * 100} height={8} color={T.gold} />
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {CIE_MODULES.map((mod, i) => (
+          <div key={mod.id} className="fade-up" style={{ animationDelay: `${0.15 + i * 0.06}s`, animationFillMode: "backwards", background: T.white, borderRadius: 12, border: `1px solid ${activeModule === mod.id ? T.gold : T.lightBorder}`, overflow: "hidden", transition: "border-color 0.2s" }}>
+            <div onClick={() => setActiveModule(activeModule === mod.id ? null : mod.id)} style={{ padding: "18px 22px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: mod.completed ? "#E8F5E9" : T.cream, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {mod.completed ? <CheckCircle color={T.sage} /> : <span style={{ fontSize: 14, fontWeight: 700, color: T.warmGray }}>{mod.id}</span>}
+              </div>
+              <div style={{ flex: 1 }}>
+                <h4 style={{ fontSize: 15, fontWeight: 600, marginBottom: 2 }}>{mod.title}</h4>
+                <p style={{ fontSize: 12, color: T.warmGray }}>{mod.desc}</p>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                <span style={{ fontSize: 11, color: T.warmGray }}>{mod.duration}</span>
+                <div style={{ transform: activeModule === mod.id ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", color: T.warmGray }}><ChevronRight /></div>
+              </div>
+            </div>
+            {activeModule === mod.id && (
+              <div className="fade-in" style={{ padding: "0 22px 22px", borderTop: `1px solid ${T.lightBorder}` }}>
+                <div style={{ paddingTop: 18 }}>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: T.charcoal, marginBottom: 16 }}>
+                    {mod.id === 1 && "Community lending lets you earn a return by lending directly to businesses in your neighborhood. Unlike stocks or mutual funds, you can see exactly where your money goes. When you invest through Lay Your Bricks, you're making a fixed-rate loan that gets paid back with interest over a set period of time."}
+                    {mod.id === 2 && "Every investment carries risk. With community lending, the main risk is that a business may not be able to repay the full loan. Interest rates (typically 5-10%) reflect this risk. Longer terms and higher loan amounts generally carry higher rates. Diversifying across multiple businesses helps reduce your exposure to any single outcome."}
+                    {mod.id === 3 && "A strong business profile shows clear revenue history, a specific use of funds, realistic repayment capacity, and community roots. Look for businesses with at least 2 years of operating history, monthly revenue that comfortably covers loan payments, and a clear explanation of how the funds will generate growth."}
+                    {mod.id === 4 && "Even at $50 per investment, you can spread your portfolio across multiple businesses and sectors. A good starting strategy: invest in 3-5 different businesses across different neighborhoods and industries. This way, the success of your portfolio doesn't depend on any single business."}
+                    {mod.id === 5 && "As a community investor, you have the right to receive regular updates on your loan's status, see repayment schedules, and access platform-level reporting. If a business faces difficulty, the platform works with borrowers on restructuring plans before any default action is taken."}
+                  </p>
+                  <button style={{ padding: "10px 20px", borderRadius: 8, fontSize: 13, fontWeight: 600, background: mod.completed ? T.cream : T.terracotta, color: mod.completed ? T.charcoal : T.cream, border: mod.completed ? `1px solid ${T.lightBorder}` : "none" }}>
+                    {mod.completed ? "Review Again" : "Mark as Complete"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── FOOTER ───
+function Footer() {
+  return (
+    <div style={{ background: T.charcoal, padding: "36px 24px", marginTop: 60, borderTop: `3px solid ${T.terracotta}` }}>
+      <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <BrickIcon size={22} color={T.terracotta} />
+            <span className="serif" style={{ color: T.cream, fontSize: 17 }}>Lay Your Bricks</span>
+          </div>
+          <p style={{ color: T.warmGray, fontSize: 12, fontStyle: "italic" }}>Build the Future, Brick by Brick.</p>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <p style={{ color: T.warmGray, fontSize: 11, lineHeight: 1.6, maxWidth: 340 }}>This is a platform demo for illustration purposes only. No real investments are being solicited or accepted. Lay Your Bricks plans to operate under applicable securities regulations.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── APP ROOT ───
+function App() {
+  const [view, setView] = useState("explore");
+  const [selectedBiz, setSelectedBiz] = useState(null);
+  const [selectedVertical, setSelectedVertical] = useState(null);
+  const [popupVertical, setPopupVertical] = useState(null);
+
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); }, [view, selectedBiz, selectedVertical]);
+
+  return (
+    <>
+      <style>{baseStyles}</style>
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+        <Topbar view={view} setView={setView} setSelectedBiz={setSelectedBiz} setSelectedVertical={setSelectedVertical} />
+        <div style={{ flex: 1 }}>
+          {view === "explore" && !selectedVertical && !selectedBiz && (
+            <NeighborhoodView onSelectVertical={(v) => setPopupVertical(v)} />
+          )}
+          {view === "explore" && selectedVertical && !selectedBiz && (
+            <VerticalBrowseView vertical={selectedVertical} businesses={BUSINESSES} onSelect={setSelectedBiz} onBack={() => setSelectedVertical(null)} />
+          )}
+          {view === "explore" && selectedBiz && (
+            <BusinessDetail biz={selectedBiz} onBack={() => setSelectedBiz(null)} />
+          )}
+          {view === "dashboard" && <DashboardView />}
+          {view === "apply" && <ApplyView />}
+          {view === "learn" && <CIEView />}
+        </div>
+        <Footer />
+        {popupVertical && (
+          <VerticalPopup vertical={popupVertical} onClose={() => setPopupVertical(null)}
+            onViewAll={() => { setSelectedVertical(popupVertical); setPopupVertical(null); }} />
+        )}
+      </div>
+    </>
+  );
+}
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>
